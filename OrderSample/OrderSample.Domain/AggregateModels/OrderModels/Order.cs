@@ -19,15 +19,43 @@ namespace OrderSample.Domain.AggregateModels.OrderModels
 
         public Address Address { get; private set; }
 
+        public ICollection<OrderItem> OrderItems { get; private set; }
 
-        public Order(DateTime orderDate,string description,int buyerId,string orderStatus,Address address)
+        public Order(DateTime orderDate, string description, int buyerId, string orderStatus, Address address, ICollection<OrderItem> orderItems)
         {
-            this.OrderDate = orderDate;
-            this.Description = description;
-            this.BuyerId = buyerId;
-            this.OrderStatus = orderStatus;
-            this.Address = address;
+            EqualOrderDateWithToday(orderDate);
+            IfEmptyToStringProperty(address.City, "city");
+
+            OrderDate = orderDate;
+            Description = description ?? throw new ArgumentNullException(nameof(description));
+            BuyerId = buyerId;
+            OrderStatus = orderStatus ?? throw new ArgumentNullException(nameof(orderStatus));
+            Address = address ?? throw new ArgumentNullException(nameof(address));
+            OrderItems = orderItems ?? throw new ArgumentNullException(nameof(orderItems));
         }
+
+        public void AddOrderItem(int quantity,decimal price,int productId)
+        {
+            OrderItems.Add(new OrderItem(quantity,price,productId));
+        }
+
+        private void EqualOrderDateWithToday(DateTime orderDate)
+        {
+            if (orderDate < DateTime.Now)
+            {
+                throw new Exception("Order date must be greater than now");
+            }
+           
+        }
+
+        private void IfEmptyToStringProperty(string property,string propertyName)
+        {
+            if (property == "")
+            {
+                throw new Exception($"{propertyName} can not be empty");
+            }
+        }
+
 
     }
 }
